@@ -15,31 +15,33 @@ export function RemindersList() {
     {
       id: 1,
       type: "appointment",
-      title: t("reminders.cardiology_appointment"),
-      description: t("reminders.followup_consultation"),
+      title: t("cardiology_appointment"),
+      description: t("followup_consultation"),
       date: "2024-01-20",
       time: "14:30",
       method: "sms",
       language: "en",
       active: true,
-      patient: "Marie Dubois",
+      patientp: "Marie Dubois",
+      professional: "Jean Marthe",
     },
     {
       id: 2,
       type: "medication",
-      title: t("reminders.medication_intake"),
-      description: t("reminders.aspirin_tablet"),
+      title: t("medication_intake"),
+      description: t("aspirin_tablet"),
       date: "2024-01-18",
       time: "08:00",
       method: "call",
       language: "fr",
       active: true,
       patient: "John Smith",
+      professional: "Jean Marthe",
     },
     {
       id: 3,
       type: "appointment",
-      title: t("reminders.blood_test"),
+      title: t("blood_test"),
       description: t("reminders.lab_fasting"),
       date: "2024-01-22",
       time: "09:00",
@@ -47,6 +49,7 @@ export function RemindersList() {
       language: "duala",
       active: false,
       patient: "Ngozi Mballa",
+      professional: "jean marthe",
     },
   ])
 
@@ -142,8 +145,8 @@ export function RemindersList() {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-medium">{t("reminders.patient")}:</span>
-              <span>{reminder.patient}</span>
+              <span className="font-medium">{t("Professional")}:</span>
+              <span>{reminder.professional}</span>
             </div>
           </div>
         </CardContent>

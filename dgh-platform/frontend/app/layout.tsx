@@ -15,9 +15,9 @@ const poppins = Poppins({
 })
 
 export const metadata: Metadata = {
-  title: "MedAdmin - Professional Dashboard",
+  title: "Medical platform for feedbacks",
   description: "Medical administration system for healthcare professionals",
-    generator: 'v0.dev'
+    generator: ''
 }
 
 export default function RootLayout({

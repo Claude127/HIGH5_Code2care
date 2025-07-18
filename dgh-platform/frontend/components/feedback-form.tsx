@@ -119,7 +119,7 @@ export function FeedbackForm() {
             </CardHeader>
             <CardContent>
               <Textarea
-                placeholder={t("feedback.placeholder")}
+                placeholder={t("write something down")}
                 value={textFeedback}
                 onChange={(e) => setTextFeedback(e.target.value)}
                 className="min-h-[150px] bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
@@ -203,7 +203,7 @@ export function FeedbackForm() {
       {/* Patient Info */}
       <Card className="border-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-xl">{t("feedback.patient_info")}</CardTitle>
+          <CardTitle className="text-xl">{t("ward_info")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -217,7 +217,7 @@ export function FeedbackForm() {
                 className="bg-white/80 dark:bg-gray-900/80 border-white/20 focus:border-blue-300 dark:focus:border-blue-600"
               />
             </div> */}
-            <div>
+            <div className="align-middle">
               <Label htmlFor="department" className="text-sm font-medium">
                 {t("Department")}
               </Label>
