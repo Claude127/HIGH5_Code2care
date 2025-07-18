@@ -7,6 +7,8 @@ This directory contains the 03 tracks produced without the knowledge of the CODE
 ## Overview
 This project aims to capture and act on patient feedback while providing automated reminders for appointments and medications. It supports multiple languages (French, English, Duala, Bassa, Ewondo, etc.) and is designed to function even in low-bandwidth conditions (e.g., 2G networks). The system includes a feedback analysis engine, a multilingual patient interface, and a real-time hospital performance dashboard.
 
+![Architecture](docs/architecture.jpg)
+
 ---
 
 ## Features
@@ -34,5 +36,5 @@ This project aims to capture and act on patient feedback while providing automat
 - **Reporting**: Supports report exports.
 - **Authentication**: Role-based access control.
 
-![Architecture](docs/architecture.jpg)
+
 ![Tools](docs/patient_feedback_tools1.JPG)
