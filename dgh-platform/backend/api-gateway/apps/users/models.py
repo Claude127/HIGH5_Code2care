@@ -28,7 +28,7 @@ class User(AbstractUser):
 class Patient(models.Model):
     """Profil Patient selon le MCD"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    patient_id = models.CharField(max_length=50, unique=True, db_index=True)
+    patient_id = models.CharField(max_length=50, unique=True, db_index=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     date_of_birth = models.DateField()
@@ -49,6 +49,11 @@ class Patient(models.Model):
         ('voice', 'Voice Call'),
         ('whatsapp', 'WhatsApp'),
     ], default='sms')
+    
+    def save(self, *args, **kwargs):
+        if not self.patient_id:
+            self.patient_id = f"PAT{str(self.user.id)[:8]}"
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = 'patients'
@@ -60,7 +65,7 @@ class Patient(models.Model):
 class Professional(models.Model):
     """Profil Professional selon le MCD"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-    professional_id = models.CharField(max_length=50, unique=True, db_index=True)
+    professional_id = models.CharField(max_length=50, unique=True, db_index=True, blank=True)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     gender = models.CharField(max_length=10, choices=[
@@ -69,9 +74,14 @@ class Professional(models.Model):
         ('O', 'Other')
     ])
     date_of_birth = models.DateField()
-    department_id = models.CharField(max_length=50)  # Référence au service feedback
+    department_id = models.CharField(max_length=50, blank=True)
     specialization = models.CharField(max_length=100, blank=True)
     license_number = models.CharField(max_length=50, unique=True, blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.professional_id:
+            self.professional_id = f"PRO{str(self.user.id)[:8]}"
+        super().save(*args, **kwargs)
 
     class Meta:
         db_table = 'professionals'
