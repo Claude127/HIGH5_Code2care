@@ -69,6 +69,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'apps.gateway.middleware.ServiceRoutingMiddleware',
+    'apps.gateway.middleware.RequestTracingMiddleware',
 ]
 
 # REST Framework
@@ -104,7 +106,7 @@ MICROSERVICES = {
 }
 
 # CORS
-CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', '').split(',')
+CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default= '', cast=lambda v: [s.strip() for s in v.split(',')])
 CORS_ALLOW_CREDENTIALS = True
 
 CACHES = {
