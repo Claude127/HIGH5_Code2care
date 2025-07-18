@@ -33,3 +33,6 @@ This project aims to capture and act on patient feedback while providing automat
 - **Filters**: Allows filtering by time period, language, and department.
 - **Reporting**: Supports report exports.
 - **Authentication**: Role-based access control.
+
+![Architecture](https://github.com/Claude127/HIGH5_Code2care/docs/architecture.jpg)
+![Tools](https://github.com/Claude127/HIGH5_Code2care/docs/patient_feedback_tools1.JPG)
