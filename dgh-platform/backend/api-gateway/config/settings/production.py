@@ -30,6 +30,6 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Security
-DEBUG = False
+DEBUG = config('DEBUG', default=False, cast=bool)
 SECRET_KEY = config('DJANGO_SECRET_KEY', default=SECRET_KEY)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=lambda v: [s.strip() for s in v.split(',')])
