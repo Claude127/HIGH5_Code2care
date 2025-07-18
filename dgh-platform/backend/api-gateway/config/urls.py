@@ -9,12 +9,13 @@ schema_view = get_schema_view(
     openapi.Info(
         title="DGH API Gateway",
         default_version='v1',
-        description="API Gateway pour le système DGH",
+        description="API Gateway pour le système DGH - Point d'entrée vers les microservices",
         terms_of_service="https://www.dgh.cm/terms/",
         contact=openapi.Contact(email="tech@dgh.cm"),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
+    authentication_classes=[],
 )
 
 urlpatterns = [

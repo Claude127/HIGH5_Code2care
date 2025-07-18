@@ -9,9 +9,11 @@ from django.db import transaction
 from .models import User, Patient, Professional
 from .serializers import (
     UserSerializer, PatientSerializer, ProfessionalSerializer,
-    LoginSerializer, RegisterPatientSerializer, RegisterProfessionalSerializer
+    LoginSerializer, RegisterPatientSerializer, RegisterProfessionalSerializer, LogoutSerializer
 )
 import logging
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 logger = logging.getLogger(__name__)
 
@@ -92,6 +94,36 @@ class RegisterProfessionalView(generics.CreateAPIView):
         }, status=status.HTTP_201_CREATED)
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Connexion utilisateur",
+    operation_description="Authentifie un utilisateur (patient ou professionnel) et retourne les tokens JWT",
+    request_body=LoginSerializer,
+    responses={
+        200: openapi.Response(
+            description="Connexion réussie",
+            examples={
+                "application/json": {
+                    "user": {
+                        "id": "uuid-here",
+                        "username": "patient_test",
+                        "user_type": "patient"
+                    },
+                    "profile": {
+                        "patient_id": "PAT12345678",
+                        "first_name": "Jean",
+                        "last_name": "Dupont"
+                    },
+                    "tokens": {
+                        "refresh": "eyJ0eXAiOiJKV1Q...",
+                        "access": "eyJ0eXAiOiJKV1Q..."
+                    }
+                }
+            }
+        ),
+        401: "Identifiants invalides"
+    }
+)
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
@@ -141,6 +173,23 @@ def login_view(request):
     })
 
 
+@swagger_auto_schema(
+    method='post',
+    operation_summary="Déconnexion utilisateur",
+    operation_description="Déconnecte un utilisateur en blacklistant son refresh token",
+    request_body=LogoutSerializer,
+    responses={
+        200: openapi.Response(
+            description="Déconnexion réussie",
+            examples={
+                "application/json": {
+                    "detail": "Successfully logged out"
+                }
+            }
+        ),
+        400: "Token invalide ou manquant"
+    }
+)
 @api_view(['POST'])
 def logout_view(request):
     """Déconnexion avec blacklist du token"""

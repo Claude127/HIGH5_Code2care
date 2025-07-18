@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-qg(^1=7*y$f_nsw@t$^y_ljf%z$636=y_a%ni393&cg#uo-ul7')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
@@ -88,6 +88,23 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
+
+# Swagger settings
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'USE_SESSION_AUTH': False,
+    'LOGIN_URL': '/api/v1/auth/login/',
+    'LOGOUT_URL': '/api/v1/auth/logout/',
+}
+
+# Disable Django's default login URL
+LOGIN_URL = '/api/v1/auth/login/'
 
 # JWT Settings
 SIMPLE_JWT = {
