@@ -1,5 +1,6 @@
 from .base import *
 from decouple import config
+import os
 
 # Database
 DATABASES = {
@@ -20,6 +21,13 @@ MIDDLEWARE = [
     'apps.gateway.middleware.ServiceRoutingMiddleware',
     'apps.gateway.middleware.RequestTracingMiddleware',
 ]
+
+# Static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+
+# WhiteNoise configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Security
 DEBUG = False
