@@ -48,7 +48,7 @@ function PublicHomePage() {
             <Link href="/login">
               <Button variant="outline" className="gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
                 <Stethoscope className="h-4 w-4" />
-                Doctor Login
+                Professional Login
               </Button>
             </Link>
             <LanguageSelector />
