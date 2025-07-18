@@ -9,28 +9,34 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
+from decouple import config
+from dj_database_url import parse as db_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-qg(^1=7*y$f_nsw@t$^y_ljf%z$636=y_a%ni393&cg#uo-ul7'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-qg(^1=7*y$f_nsw@t$^y_ljf%z$636=y_a%ni393&cg#uo-ul7')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 
 
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,8 +45,24 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+    'drf_yasg',
+]
+
+LOCAL_APPS = [
+    'apps.gateway',
+    'apps.users',
+    'apps.common',
+]
+
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -48,6 +70,52 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+}
+
+# JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+# Microservices URLs
+MICROSERVICES = {
+    'FEEDBACK_SERVICE': config('FEEDBACK_SERVICE_URL', 'http://localhost:8001'),
+    'CHAT_SERVICE': config('CHAT_SERVICE_URL', 'http://localhost:8002'),
+    'ANALYTICS_SERVICE': config('ANALYTICS_SERVICE_URL', 'http://localhost:8003'),
+}
+
+# CORS
+CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', '').split(',')
+CORS_ALLOW_CREDENTIALS = True
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': config('REDIS_URL', 'redis://redis:6379/0'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
 
 ROOT_URLCONF = 'config.urls'
 
@@ -73,10 +141,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': config(
+        'DATABASE_URL',
+        default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+        cast=db_url
+    )
 }
 
 
