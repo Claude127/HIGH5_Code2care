@@ -73,8 +73,8 @@ class RegisterPatientSerializer(serializers.ModelSerializer):
     user = UserRegistrationSerializer(write_only=True, help_text="Données utilisateur")
     patient_id = serializers.CharField(
         max_length=50, 
-        required=False, 
-        help_text="ID patient (généré automatiquement si vide)"
+        read_only=True,
+        help_text="ID patient (généré automatiquement)"
     )
     first_name = serializers.CharField(
         max_length=100,
