@@ -112,15 +112,28 @@ ROOT_URLCONF = 'config.urls'
 CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default= '', cast=lambda v: [s.strip() for s in v.split(',')])
 CORS_ALLOW_CREDENTIALS = True
 
+REDIS_URL = config('REDIS_URL', 'redis://redis:6379/0')
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', 'redis://redis:6379/0'),
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Paris'
+
+TWILO_ACCOUNT_SID = config('TWILO_ACCOUNT_SID')
+TWILO_AUTH_TOKEN = config('TWILO_AUTH_TOKEN')
+TWILO_PHONE_NUMBER = config('TWILO_PHONE_NUMBER')
 
 TEMPLATES = [
     {
