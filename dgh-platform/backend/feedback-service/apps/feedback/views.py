@@ -66,7 +66,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         return queryset
     
     def perform_create(self, serializer):
-        """Crée le feedback et lance le traitement automatique"""
+        """Crée le feedback - le traitement sera automatique via les signaux"""
         # Auto-assigner le patient_id depuis les headers si non fourni
         user_id = self.request.headers.get('X-User-ID')
         user_type = self.request.headers.get('X-User-Type')
@@ -76,8 +76,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         else:
             feedback = serializer.save()
         
-        # Traitement automatique du feedback (catégorisation)
-        process_feedback(feedback)
+        # Le traitement asynchrone sera déclenché automatiquement par le signal post_save
     
     @action(detail=False, methods=['get'])
     def my_feedbacks(self, request):
@@ -116,6 +115,53 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             })
         
         return Response(result)
+    
+    @action(detail=False, methods=['post'])
+    def test_feedback_processing(self, request):
+        """Endpoint de test pour créer un feedback et vérifier le traitement"""
+        test_data = {
+            'description': request.data.get('description', 'Test de satisfaction du service médical'),
+            'rating': request.data.get('rating', 4),
+            'language': request.data.get('language', 'fr'),
+            'input_type': request.data.get('input_type', 'text'),
+            'patient_id': request.data.get('patient_id', '12345678-1234-1234-1234-123456789abc'),
+            'department_id': request.data.get('department_id', '87654321-4321-4321-4321-cba987654321')
+        }
+        
+        # Création du feedback de test
+        serializer = FeedbackCreateSerializer(data=test_data)
+        if serializer.is_valid():
+            feedback = serializer.save()
+            
+            return Response({
+                'message': 'Feedback de test créé avec succès',
+                'feedback_id': feedback.feedback_id,
+                'status': 'Le traitement asynchrone va commencer automatiquement',
+                'check_processing_url': f'/api/feedbacks/{feedback.feedback_id}/',
+                'test_data': test_data
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=True, methods=['get'])
+    def processing_status(self, request, pk=None):
+        """Vérifie le statut de traitement d'un feedback"""
+        feedback = self.get_object()
+        
+        return Response({
+            'feedback_id': feedback.feedback_id,
+            'is_processed': feedback.is_processed,
+            'processed_at': feedback.processed_at,
+            'sentiment': feedback.sentiment,
+            'sentiment_scores': {
+                'positive': feedback.sentiment_positive_score,
+                'negative': feedback.sentiment_negative_score,
+                'neutral': feedback.sentiment_neutral_score
+            },
+            'theme': feedback.theme.theme_name if feedback.theme else None,
+            'description': feedback.description,
+            'rating': feedback.rating
+        })
 
 
 class AppointmentViewSet(viewsets.ModelViewSet):
