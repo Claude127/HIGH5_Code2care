@@ -49,7 +49,7 @@ export function LoginForm() {
             <Stethoscope className="h-8 w-8 text-white" />
           </div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            MedAdmin
+            Medical platform
           </CardTitle>
           <CardDescription className="text-lg">Professional Healthcare Dashboard</CardDescription>
         </CardHeader>

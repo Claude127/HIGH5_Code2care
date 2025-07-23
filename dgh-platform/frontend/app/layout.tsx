@@ -1,48 +1,42 @@
 import type React from "react"
-import "./globals.css"
 import type { Metadata } from "next"
-import { Inter, Poppins } from "next/font/google"
+import { Inter } from "next/font/google"
+import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { AuthProvider } from "@/contexts/auth-context"
-import { Toaster } from "@/components/ui/toaster"
-import { LanguageProvider } from "@/contexts/language-context"
+import { AuthProvider } from '../contexts/auth-context'
+import { PatientAuthProvider } from "@/components/patient-auth-context"
+import { LanguageProvider } from '@/contexts/language-context'
+
 
 const inter = Inter({ subsets: ["latin"] })
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-poppins",
-})
 
 export const metadata: Metadata = {
-  title: "Medical platform for feedbacks",
-  description: "Medical administration system for healthcare professionals",
+    title: "HIGH5 medical platform",
+    description: "Modern medical platform for professionals and patients",
     generator: ''
 }
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
+                                       children,
+                                   }: {
+    children: React.ReactNode
 }) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} ${poppins.variable}`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={true}
-          disableTransitionOnChange={false}
-          storageKey="medadmin-theme"
-        >
-          <LanguageProvider>
+    return (
+        // app/layout.tsx
+        <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
+        <body className={`${inter.className} overflow-x-hidden w-full max-w-full`}>
+        <PatientAuthProvider>
             <AuthProvider>
-              {children}
-              <Toaster />
+                <LanguageProvider>
+
+                <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange={false}>
+                    <div className="w-full max-w-full overflow-x-hidden">{children}</div>
+                </ThemeProvider>
+                </LanguageProvider>
+
             </AuthProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+        </PatientAuthProvider>
+        </body>
+        </html>
+    )
 }
