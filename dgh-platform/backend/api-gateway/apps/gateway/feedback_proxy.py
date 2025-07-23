@@ -12,7 +12,7 @@ from .swagger_schemas import (
     create_feedback_decorator, my_feedbacks_decorator, 
     feedback_status_decorator, test_feedback_decorator
 )
-import requests
+import httpx
 import json
 import logging
 
@@ -68,12 +68,12 @@ def create_feedback(request):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        response = requests.post(
-            f"{service_url}/api/v1/feedbacks/",  # URL corrigée
-            headers=headers,
-            json=feedback_data,
-            timeout=30.0
-        )
+        with httpx.Client(timeout=30.0) as client:
+            response = client.post(
+                f"{service_url}/api/v1/feedbacks/",  # URL corrigée
+                headers=headers,
+                json=feedback_data
+            )
         
         if response.status_code == 201:
             return Response(
@@ -90,7 +90,7 @@ def create_feedback(request):
                 status=response.status_code
             )
                 
-    except requests.exceptions.Timeout:
+    except httpx.TimeoutException:
         logger.error("Timeout lors de la création du feedback")
         return Response(
             {'error': 'Délai d\'attente dépassé, veuillez réessayer'}, 
@@ -129,12 +129,12 @@ def my_feedbacks(request):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        response = requests.get(
-            f"{service_url}/api/v1/feedbacks/my_feedbacks/",  # URL corrigée
-            headers=headers,
-            params=request.query_params.dict(),
-            timeout=30.0
-        )
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/feedbacks/my_feedbacks/",  # URL corrigée
+                headers=headers,
+                params=request.query_params.dict()
+            )
         
         return Response(response.json(), status=response.status_code)
             
@@ -171,11 +171,11 @@ def feedback_status(request, feedback_id):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        response = requests.get(
-            f"{service_url}/api/v1/feedbacks/{feedback_id}/processing_status/",  # URL corrigée
-            headers=headers,
-            timeout=30.0
-        )
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/feedbacks/{feedback_id}/processing_status/",  # URL corrigée
+                headers=headers
+            )
         
         return Response(response.json(), status=response.status_code)
             
@@ -223,12 +223,12 @@ def test_feedback(request):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        response = requests.post(
-            f"{service_url}/api/v1/feedbacks/",  # URL corrigée
-            headers=headers,
-            json=test_data,
-            timeout=30.0
-        )
+        with httpx.Client(timeout=30.0) as client:
+            response = client.post(
+                f"{service_url}/api/v1/feedbacks/",  # URL corrigée
+                headers=headers,
+                json=test_data
+            )
         
         if response.status_code == 201:
             feedback_data = response.json()
