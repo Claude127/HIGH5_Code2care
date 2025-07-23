@@ -26,6 +26,9 @@ urlpatterns = [
     # Authentication endpoints
     path('api/v1/auth/', include('apps.users.urls')),
     
+    # Feedback endpoints pour patients (via proxy)
+    path('', include('apps.gateway.urls')),
+    
     # API Documentation
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

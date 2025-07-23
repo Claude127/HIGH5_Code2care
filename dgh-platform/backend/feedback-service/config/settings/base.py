@@ -48,13 +48,15 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
-    'rest_framework_simplejwt',
     'corsheaders',
     'drf_yasg',
+    'django_filters',
 ]
 
 LOCAL_APPS = [
-    ''
+    'apps.feedback',
+    'apps.analytics',
+    'apps.common',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -68,16 +70,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'apps.gateway.middleware.ServiceRoutingMiddleware',
-    'apps.gateway.middleware.RequestTracingMiddleware',
 ]
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
@@ -109,18 +107,32 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default= '', cast=lambda v: [s.strip() for s in v.split(',')])
+CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default='http://api-gateway:8000', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
 CORS_ALLOW_CREDENTIALS = True
+
+REDIS_URL = config('REDIS_URL', 'redis://localhost:6379/0')
 
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': config('REDIS_URL', 'redis://redis:6379/0'),
+        'LOCATION': REDIS_URL,
         'OPTIONS': {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         }
     }
 }
+
+CELERY_BROKER_URL = REDIS_URL
+CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Douala'
+CELERY_ENABLE_UTC = True
+
+TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', '')
+TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', '')
 
 TEMPLATES = [
     {
@@ -176,7 +188,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Douala'
 
 USE_I18N = True
 
@@ -193,3 +205,25 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuration des logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'apps.feedback.signals': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}
