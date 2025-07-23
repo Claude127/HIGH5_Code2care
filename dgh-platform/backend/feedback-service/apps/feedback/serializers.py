@@ -54,8 +54,8 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
         try:
             uuid.UUID(str(value))
             return value
-        except (ValueError, TypeError):
-            raise serializers.ValidationError("Patient ID doit être un UUID valide")
+        except (ValueError, TypeError) as e:
+            raise serializers.ValidationError("Patient ID doit être un UUID valide") from e
     
     def validate_department_id(self, value):
         import uuid
