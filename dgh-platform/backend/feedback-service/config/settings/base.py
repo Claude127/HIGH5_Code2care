@@ -50,6 +50,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_yasg',
+    'django_filters',
 ]
 
 LOCAL_APPS = [
@@ -106,10 +107,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default= '', cast=lambda v: [s.strip() for s in v.split(',')])
+CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default='http://api-gateway:8000', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
 CORS_ALLOW_CREDENTIALS = True
 
-REDIS_URL = config('REDIS_URL', 'redis://redis:6379/0')
+REDIS_URL = config('REDIS_URL', 'redis://localhost:6379/0')
 
 CACHES = {
     'default': {
@@ -126,11 +127,12 @@ CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'Europe/Paris'
+CELERY_TIMEZONE = 'Africa/Douala'
+CELERY_ENABLE_UTC = True
 
-TWILO_ACCOUNT_SID = config('TWILO_ACCOUNT_SID')
-TWILO_AUTH_TOKEN = config('TWILO_AUTH_TOKEN')
-TWILO_PHONE_NUMBER = config('TWILO_PHONE_NUMBER')
+TWILO_ACCOUNT_SID = config('TWILO_ACCOUNT_SID', '')
+TWILO_AUTH_TOKEN = config('TWILO_AUTH_TOKEN', '')
+TWILO_PHONE_NUMBER = config('TWILO_PHONE_NUMBER', '')
 
 TEMPLATES = [
     {
@@ -186,7 +188,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Douala'
 
 USE_I18N = True
 
@@ -203,3 +205,24 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Configuration des logs
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+    },
+    'loggers': {
+        'apps.feedback.signals': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

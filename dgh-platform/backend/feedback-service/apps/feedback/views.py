@@ -65,18 +65,26 @@ class FeedbackViewSet(viewsets.ModelViewSet):
             
         return queryset
     
-    def perform_create(self, serializer):
-        """Crée le feedback - le traitement sera automatique via les signaux"""
+    def create(self, request, *args, **kwargs):
+        """Crée le feedback et retourne une réponse avec feedback_id"""
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
         # Auto-assigner le patient_id depuis les headers si non fourni
-        user_id = self.request.headers.get('X-User-ID')
-        user_type = self.request.headers.get('X-User-Type')
+        user_id = request.headers.get('X-User-ID')
+        user_type = request.headers.get('X-User-Type')
         
         if user_type == 'patient' and user_id and 'patient_id' not in serializer.validated_data:
             feedback = serializer.save(patient_id=user_id)
         else:
             feedback = serializer.save()
         
-        # Le traitement asynchrone sera déclenché automatiquement par le signal post_save
+        # Retourner la réponse avec feedback_id
+        response_data = serializer.data.copy()
+        response_data['feedback_id'] = str(feedback.feedback_id)
+        
+        headers = self.get_success_headers(response_data)
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
     
     @action(detail=False, methods=['get'])
     def my_feedbacks(self, request):

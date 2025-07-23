@@ -14,7 +14,7 @@ def categorize_feedback_theme(sentiment: str, rating: int) -> str:
     """
     Détermine le thème basé sur le sentiment et le rating
     """
-    get_feedback_theme(sentiment, rating)
+    return get_feedback_theme(sentiment, rating)
 
 
 
@@ -51,7 +51,9 @@ def process_feedback(feedback: Feedback) -> Feedback:
         logger.info(f"Traitement du feedback {feedback.feedback_id}")
         
         # Analyse de sentiment
+        logger.info("Début analyse de sentiment...")
         sentiment, scores = get_sentiment_data(feedback.description)
+        logger.info(f"Sentiment obtenu: {sentiment}, scores: {scores}")
         
         # Mise à jour du sentiment et des scores
         feedback.sentiment = sentiment

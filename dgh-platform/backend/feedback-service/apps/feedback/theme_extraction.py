@@ -10,6 +10,10 @@ def get_feedback_theme(sentiment: str, rating: int) -> str:
         theme_name: Nom du thème approprié
     TODO: implement ai such as gemini/ollama for this part but this is nice for the mock
     """
+    # Gestion du cas où sentiment est None ou vide
+    if not sentiment:
+        sentiment = "neutral"
+    
     if sentiment == "positive" and rating >= 4:
         return "Satisfaction - Service excellent"
     elif sentiment == "positive" and rating >= 3:
@@ -26,4 +30,4 @@ def get_feedback_theme(sentiment: str, rating: int) -> str:
         else:
             return "Neutre - Service moyen"
     else:
-        return "Incohérence sentiment/rating"
+        return "Feedback - Évaluation générale"

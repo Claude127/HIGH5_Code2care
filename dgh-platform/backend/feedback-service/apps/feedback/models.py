@@ -97,7 +97,7 @@ class Feedback(models.Model):
         ]
     
     def __str__(self):
-        return f"Feedback {self.feedback_id} - {self.type_type}"
+        return f"Feedback {self.feedback_id} - {self.input_type}"
 
 
 class Appointment(models.Model):

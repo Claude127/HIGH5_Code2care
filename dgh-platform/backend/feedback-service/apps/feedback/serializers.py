@@ -48,6 +48,22 @@ class FeedbackCreateSerializer(serializers.ModelSerializer):
         if value not in [1, 2, 3, 4, 5]:
             raise serializers.ValidationError("Le rating doit être entre 1 et 5")
         return value
+    
+    def validate_patient_id(self, value):
+        import uuid
+        try:
+            uuid.UUID(str(value))
+            return value
+        except (ValueError, TypeError):
+            raise serializers.ValidationError("Patient ID doit être un UUID valide")
+    
+    def validate_department_id(self, value):
+        import uuid
+        try:
+            uuid.UUID(str(value))
+            return value
+        except (ValueError, TypeError):
+            raise serializers.ValidationError("Department ID doit être un UUID valide")
 
 
 class AppointmentSerializer(serializers.ModelSerializer):

@@ -31,3 +31,7 @@ whitenoise==6.6.0
 torch==2.7.1
 transformers==4.53.1
 celery==5.5.3
+tiktoken==0.8.0
+protobuf==5.29.2
+django-filter==24.3
+sentencepiece==0.2.0
