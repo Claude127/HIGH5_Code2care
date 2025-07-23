@@ -121,8 +121,8 @@ SIMPLE_JWT = {
 # Microservices URLs
 MICROSERVICES = {
     'FEEDBACK_SERVICE': config('FEEDBACK_SERVICE_URL', 'http://localhost:8001'),
-    'CHAT_SERVICE': config('CHAT_SERVICE_URL', 'http://localhost:8002'),
-    'ANALYTICS_SERVICE': config('ANALYTICS_SERVICE_URL', 'http://localhost:8003'),
+    # 'CHAT_SERVICE': config('CHAT_SERVICE_URL', 'http://localhost:8002'),
+    # 'ANALYTICS_SERVICE': config('ANALYTICS_SERVICE_URL', 'http://localhost:8003'),
 }
 
 # CORS

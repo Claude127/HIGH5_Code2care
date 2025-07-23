@@ -12,7 +12,7 @@ from .swagger_schemas import (
     create_feedback_decorator, my_feedbacks_decorator, 
     feedback_status_decorator, test_feedback_decorator
 )
-import httpx
+import requests
 import json
 import logging
 
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 @create_feedback_decorator
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-async def create_feedback(request):
+def create_feedback(request):
     """
     Endpoint pour création de feedback par un patient
     Route: POST /api/v1/patient/feedback/
@@ -68,29 +68,29 @@ async def create_feedback(request):
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                f"{service_url}/api/v1/feedbacks/",  # URL corrigée
-                headers=headers,
-                json=feedback_data
+        response = requests.post(
+            f"{service_url}/api/v1/feedbacks/",  # URL corrigée
+            headers=headers,
+            json=feedback_data,
+            timeout=30.0
+        )
+        
+        if response.status_code == 201:
+            return Response(
+                {
+                    'message': 'Feedback créé avec succès',
+                    'feedback': response.json(),
+                    'processing_info': 'L\'analyse de sentiment se fait automatiquement en arrière-plan'
+                }, 
+                status=status.HTTP_201_CREATED
             )
-            
-            if response.status_code == 201:
-                return Response(
-                    {
-                        'message': 'Feedback créé avec succès',
-                        'feedback': response.json(),
-                        'processing_info': 'L\'analyse de sentiment se fait automatiquement en arrière-plan'
-                    }, 
-                    status=status.HTTP_201_CREATED
-                )
-            else:
-                return Response(
-                    response.json(), 
-                    status=response.status_code
-                )
+        else:
+            return Response(
+                response.json(), 
+                status=response.status_code
+            )
                 
-    except httpx.TimeoutException:
+    except requests.exceptions.Timeout:
         logger.error("Timeout lors de la création du feedback")
         return Response(
             {'error': 'Délai d\'attente dépassé, veuillez réessayer'}, 
@@ -107,7 +107,7 @@ async def create_feedback(request):
 @my_feedbacks_decorator
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-async def my_feedbacks(request):
+def my_feedbacks(request):
     """
     Récupère les feedbacks du patient connecté
     Route: GET /api/v1/patient/feedbacks/
@@ -129,14 +129,14 @@ async def my_feedbacks(request):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{service_url}/api/v1/feedbacks/my_feedbacks/",  # URL corrigée
-                headers=headers,
-                params=request.query_params.dict()
-            )
-            
-            return Response(response.json(), status=response.status_code)
+        response = requests.get(
+            f"{service_url}/api/v1/feedbacks/my_feedbacks/",  # URL corrigée
+            headers=headers,
+            params=request.query_params.dict(),
+            timeout=30.0
+        )
+        
+        return Response(response.json(), status=response.status_code)
             
     except Exception as e:
         logger.error(f"Erreur lors de la récupération des feedbacks: {str(e)}")
@@ -149,7 +149,7 @@ async def my_feedbacks(request):
 @feedback_status_decorator
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-async def feedback_status(request, feedback_id):
+def feedback_status(request, feedback_id):
     """
     Vérifie le statut de traitement d'un feedback
     Route: GET /api/v1/patient/feedback/{feedback_id}/status/
@@ -171,13 +171,13 @@ async def feedback_status(request, feedback_id):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.get(
-                f"{service_url}/api/v1/feedbacks/{feedback_id}/processing_status/",  # URL corrigée
-                headers=headers
-            )
-            
-            return Response(response.json(), status=response.status_code)
+        response = requests.get(
+            f"{service_url}/api/v1/feedbacks/{feedback_id}/processing_status/",  # URL corrigée
+            headers=headers,
+            timeout=30.0
+        )
+        
+        return Response(response.json(), status=response.status_code)
             
     except Exception as e:
         logger.error(f"Erreur lors de la vérification du statut: {str(e)}")
@@ -190,7 +190,7 @@ async def feedback_status(request, feedback_id):
 @test_feedback_decorator
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-async def test_feedback(request):
+def test_feedback(request):
     """
     Endpoint de test pour créer un feedback avec données par défaut
     Route: POST /api/v1/patient/feedback/test/
@@ -223,29 +223,29 @@ async def test_feedback(request):
     try:
         service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
         
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(
-                f"{service_url}/api/v1/feedbacks/",  # URL corrigée
-                headers=headers,
-                json=test_data
+        response = requests.post(
+            f"{service_url}/api/v1/feedbacks/",  # URL corrigée
+            headers=headers,
+            json=test_data,
+            timeout=30.0
+        )
+        
+        if response.status_code == 201:
+            feedback_data = response.json()
+            return Response(
+                {
+                    'message': 'Feedback de test créé avec succès',
+                    'feedback': feedback_data,
+                    'test_info': {
+                        'description': 'Ce feedback sera automatiquement analysé en arrière-plan',
+                        'check_status_url': f'/api/v1/patient/feedback/{feedback_data["feedback_id"]}/status/',
+                        'wait_time': 'Attendez 10-30 secondes puis vérifiez le statut'
+                    }
+                }, 
+                status=status.HTTP_201_CREATED
             )
-            
-            if response.status_code == 201:
-                feedback_data = response.json()
-                return Response(
-                    {
-                        'message': 'Feedback de test créé avec succès',
-                        'feedback': feedback_data,
-                        'test_info': {
-                            'description': 'Ce feedback sera automatiquement analysé en arrière-plan',
-                            'check_status_url': f'/api/v1/patient/feedback/{feedback_data["feedback_id"]}/status/',
-                            'wait_time': 'Attendez 10-30 secondes puis vérifiez le statut'
-                        }
-                    }, 
-                    status=status.HTTP_201_CREATED
-                )
-            else:
-                return Response(response.json(), status=response.status_code)
+        else:
+            return Response(response.json(), status=response.status_code)
                 
     except Exception as e:
         logger.error(f"Erreur lors de la création du feedback de test: {str(e)}")
