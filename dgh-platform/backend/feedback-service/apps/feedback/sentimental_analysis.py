@@ -12,9 +12,12 @@ logger = logging.getLogger(__name__)
 # Configuration du modèle HuggingFace
 HF_MODEL_ID = "genie10/feedback_patients"
 
-# Optimisations PyTorch
+# Optimisations PyTorch pour économiser la mémoire
 torch.set_grad_enabled(False)
 torch.set_num_threads(1)
+import os
+os.environ['PYTORCH_TRANSFORMERS_CACHE'] = '/tmp'
+os.environ['HF_HOME'] = '/tmp'
 
 # Variables globales pour le modèle (chargement lazy)
 _tokenizer = None
@@ -35,16 +38,25 @@ def _load_model():
         logger.info(f"Tokenizers version: {tokenizers.__version__}")
         
         try:
-            # Essayer avec use_fast=False pour éviter les problèmes de tokenizer
-            _tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_ID, use_fast=False)
+            # Chargement optimisé pour réduire la mémoire
+            _tokenizer = AutoTokenizer.from_pretrained(
+                HF_MODEL_ID, 
+                use_fast=False,
+                cache_dir='/tmp'
+            )
             logger.info("Tokenizer chargé avec succès (slow tokenizer)")
         except Exception as e:
             logger.warning(f"Erreur tokenizer slow, essai avec fast: {e}")
-            _tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_ID, use_fast=True)
+            _tokenizer = AutoTokenizer.from_pretrained(HF_MODEL_ID, use_fast=True, cache_dir='/tmp')
             
-        _model = AutoModelForSequenceClassification.from_pretrained(HF_MODEL_ID)
+        # Chargement du modèle avec optimisations mémoire
+        _model = AutoModelForSequenceClassification.from_pretrained(
+            HF_MODEL_ID,
+            torch_dtype=torch.float16,  # Half precision pour économiser la mémoire
+            cache_dir='/tmp'
+        )
         _model.eval()
-        logger.info("Modèle chargé avec succès")
+        logger.info("Modèle chargé avec succès (optimisé mémoire)")
 
 
 def analyze_sentiment(text: str) -> dict:
