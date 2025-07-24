@@ -61,13 +61,13 @@ export function FeedbackForm() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 sm:p-10 space-y-10">
+    <div className="space-y-8">
       {/* Rating Section */}
-      <Card className="rounded-2xl shadow-lg border-0 bg-white/70 dark:bg-gray-900/60 backdrop-blur-md">
+      <Card className="border-0 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20">
         <CardHeader>
           <CardTitle className="text-xl flex items-center gap-2">
             <Star className="h-5 w-5 text-yellow-500" />
-            {t("feedback.general_rating")}
+            {("feedback.general_rating")}
           </CardTitle>
           <CardDescription>{t("feedback.rate_experience")}</CardDescription>
         </CardHeader>
@@ -100,12 +100,12 @@ export function FeedbackForm() {
 
       {/* Feedback Input */}
       <Tabs defaultValue="text" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-white/70 dark:bg-gray-800/60 rounded-xl overflow-hidden shadow-sm">
-          <TabsTrigger value="text" className="flex items-center gap-2 py-3 text-base font-medium data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30">
+        <TabsList className="grid w-full grid-cols-2 bg-white/60 dark:bg-gray-800/60">
+          <TabsTrigger value="text" className="flex items-center gap-2">
             <Type className="h-4 w-4" />
             Text
           </TabsTrigger>
-          <TabsTrigger value="voice" className="flex items-center gap-2 py-3 text-base font-medium data-[state=active]:bg-blue-100 dark:data-[state=active]:bg-blue-900/30">
+          <TabsTrigger value="voice" className="flex items-center gap-2">
             <Volume2 className="h-4 w-4" />
             Voice
           </TabsTrigger>
@@ -119,10 +119,10 @@ export function FeedbackForm() {
             </CardHeader>
             <CardContent>
               <Textarea
-                placeholder={t("write something down")}
+                placeholder={t("feedback.placeholder")}
                 value={textFeedback}
                 onChange={(e) => setTextFeedback(e.target.value)}
-                className="min-h-[150px] bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-base focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
+                className="min-h-[150px] bg-white/80 dark:bg-gray-900/80 border-white/20 focus:border-blue-300 dark:focus:border-blue-600"
               />
             </CardContent>
           </Card>
@@ -190,8 +190,8 @@ export function FeedbackForm() {
                       {t("feedback.detected_language")}: {detectedLanguage.toUpperCase()}
                     </Badge>
                   </div>
-                  <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-100 dark:from-blue-900/10 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 shadow-sm">
-                    <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-base">{voiceTranscript}</p>
+                  <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{voiceTranscript}</p>
                   </div>
                 </div>
               )}
@@ -203,11 +203,11 @@ export function FeedbackForm() {
       {/* Patient Info */}
       <Card className="border-0 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle className="text-xl">{t("ward_info")}</CardTitle>
+          <CardTitle className="text-xl">{t("feedback.patient_info")}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* <div>
+            <div>
               <Label htmlFor="patientId" className="text-sm font-medium">
                 {t("feedback.patient_id")}
               </Label>
@@ -216,15 +216,15 @@ export function FeedbackForm() {
                 placeholder="P123456"
                 className="bg-white/80 dark:bg-gray-900/80 border-white/20 focus:border-blue-300 dark:focus:border-blue-600"
               />
-            </div> */}
-            <div className="align-middle">
+            </div>
+            <div>
               <Label htmlFor="department" className="text-sm font-medium">
-                {t("Department")}
+                {("feedback.department")}
               </Label>
               <Input
                 id="department"
                 placeholder="Cardiology"
-                className="bg-white/90 dark:bg-gray-900/90 border border-gray-300 dark:border-gray-700 rounded-xl px-4 py-2 text-base focus:ring-2 focus:ring-blue-300 dark:focus:ring-blue-600"
+                className="bg-white/80 dark:bg-gray-900/80 border-white/20 focus:border-blue-300 dark:focus:border-blue-600"
               />
             </div>
           </div>
@@ -235,18 +235,18 @@ export function FeedbackForm() {
       <Button
         onClick={handleSubmit}
         disabled={isSubmitting || (rating === 0 && !textFeedback && !voiceTranscript)}
-        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-5 text-lg font-semibold shadow-lg hover:shadow-2xl transition-all"
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all py-6 text-lg font-medium"
         size="lg"
       >
         {isSubmitting ? (
           <>
             <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-            {t("sending")}
+            {("feedback.sending")}
           </>
         ) : (
           <>
             <Send className="h-5 w-5 mr-2" />
-            {t("Send")}
+            {("feedback.send_feedback")}
           </>
         )}
       </Button>

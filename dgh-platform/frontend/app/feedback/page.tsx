@@ -7,10 +7,10 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useLanguage } from "@/contexts/language-context"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { LanguageSelector } from "@/components/language-selector"
+// import { LanguageSelector } from "@/components/language-selector"
 
 export default function FeedbackPage() {
-  const { t } = useLanguage()
+  // const { t } = useLanguage()
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-blue-950 dark:to-indigo-950">
@@ -21,7 +21,7 @@ export default function FeedbackPage() {
             <Link href="/">
               <Button variant="ghost" className="gap-2 hover:bg-white/20 dark:hover:bg-gray-800/20">
                 <ArrowLeft className="h-4 w-4" />
-                {t("common.back")}
+                {("common.back")}
               </Button>
             </Link>
             <div className="flex items-center gap-2">
@@ -32,7 +32,7 @@ export default function FeedbackPage() {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <LanguageSelector />
+            {/*<LanguageSelector />*/}
             <ThemeToggle />
           </div>
         </div>
@@ -45,10 +45,10 @@ export default function FeedbackPage() {
               <Sparkles className="h-8 w-8 text-white" />
             </div>
             <CardTitle className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-blue-800 dark:from-white dark:to-blue-200 bg-clip-text text-transparent">
-              {t("feedback.title")}
+              {("feedback.title")}
             </CardTitle>
             <CardDescription className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              {t("feedback.subtitle")}
+              {("feedback.subtitle")}
             </CardDescription>
           </CardHeader>
           <CardContent>

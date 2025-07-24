@@ -14,8 +14,8 @@ interface LanguageContextType {
 const translations = {
   en: {
     // Navigation & General
-    "app.title": "Medical feedback platform",
-    "app.subtitle": "Multilingual medical feedback platform for patients",
+    "app.title": "MedAdmin - Professional Dashboard",
+    "app.subtitle": "Medical administration system for healthcare professionals",
     "nav.home": "Home",
     "nav.feedback": "Feedback",
     "nav.reminders": "Reminders",
@@ -29,6 +29,19 @@ const translations = {
     "common.loading": "Loading...",
     "common.success": "Success",
     "common.error": "Error",
+    "welcome.subtitle": "Professional medical platform for patients and healthcare providers",
+    "welcome.patient_login": "Patient Access",
+    "welcome.patient_description": "Access your medical information, give feedback, and manage appointments",
+    "welcome.professional_login": "Healthcare Professional",
+    "welcome.professional_description": "Manage patients, appointments, prescriptions, and view analytics",
+    "welcome.continue_as_patient": "Continue as Patient",
+    "welcome.continue_as_professional": "Continue as Professional",
+    "patient.welcome": "Welcome to your Health Portal",
+    "patient.subtitle": "Manage your healthcare experience with ease",
+    "patient.login.subtitle": "Access your personal health portal",
+    "patient.login.button": "Sign In as Patient",
+    "common.welcome": "Welcome",
+    "common.logout": "Sign Out",
 
     // Home Page
     "home.patient_feedback": "Patient Feedback",
@@ -57,7 +70,7 @@ const translations = {
   },
   fr: {
     // Navigation & General
-    "app.title": "Plateforme d'avis médicaux",
+    "app.title": "MedAdmin - Tableau de Bord Professionnel",
     "app.subtitle": "Système d'administration médicale pour professionnels de santé",
     "nav.home": "Accueil",
     "nav.feedback": "Feedback",
@@ -72,10 +85,23 @@ const translations = {
     "common.loading": "Chargement...",
     "common.success": "Succès",
     "common.error": "Erreur",
+    "welcome.subtitle": "Plateforme médicale professionnelle pour patients et professionnels de santé",
+    "welcome.patient_login": "Accès Patient",
+    "welcome.patient_description": "Accédez à vos informations médicales, donnez votre avis et gérez vos rendez-vous",
+    "welcome.professional_login": "Professionnel de Santé",
+    "welcome.professional_description": "Gérez les patients, rendez-vous, prescriptions et consultez les analyses",
+    "welcome.continue_as_patient": "Continuer en tant que Patient",
+    "welcome.continue_as_professional": "Continuer en tant que Professionnel",
+    "patient.welcome": "Bienvenue sur votre Portail Santé",
+    "patient.subtitle": "Gérez votre expérience de soins en toute simplicité",
+    "patient.login.subtitle": "Accédez à votre portail santé personnel",
+    "patient.login.button": "Se connecter en tant que Patient",
+    "common.welcome": "Bienvenue",
+    "common.logout": "Se déconnecter",
 
     // Home Page
     "home.patient_feedback": "Feedback Patients",
-    "home.patient_feedback_desc": "Plateforme multilingue de retour d'expérience médicale pour les patients",
+    "home.patient_feedback_desc": "Examiner et gérer les retours patients en plusieurs langues",
     "home.give_feedback": "Examiner Feedback",
     "home.reminders": "Rappels de Rendez-vous",
     "home.reminders_desc": "Gérer les rappels automatiques et notifications patients",
@@ -99,9 +125,9 @@ const translations = {
     "lang.ewondo": "Ewondo",
   },
   duala: {
-    // Basic translations for Duala 
-    "app.title": "Liyɛ la boloba ba ndeke",
-    "app.subtitle": "Liyɛ la basɛ́pɛ ba ndeke",
+    // Basic translations for Duala (simplified for demo)
+    "app.title": "MedAdmin - Tableau na ba Dokta",
+    "app.subtitle": "Système na ba dokta na ba malades",
     "nav.home": "Ndabo",
     "nav.feedback": "Feedback",
     "nav.reminders": "Ba Reminder",
@@ -119,12 +145,12 @@ const translations = {
     "lang.ewondo": "Ewondo",
   },
   bassa: {
-    // Basic translations for Bassa 
-    "app.title": "Liyɛ́ lɛ́ ndáp mɛ́ njàng",
-    "app.subtitle": "Mbombé mɛ́ ɛ̀ wɛ́nɛ́ mɛ́ njàng mbɔ́k ɛ́ lɔ̀ŋgɔ̀",
+    // Basic translations for Bassa (simplified for demo)
+    "app.title": "MedAdmin - Tableau Bi Dokta",
+    "app.subtitle": "Système bi ba dokta bi ba malades",
     "nav.home": "Ndap",
     "nav.feedback": "Feedback",
-    "nav.reminders": "Bi Rappel",
+    "nav.reminders": "Bi Reminder",
     "nav.dashboard": "Dashboard",
     "common.back": "Kɛlɛ",
     "common.submit": "Tɔm",
@@ -139,9 +165,9 @@ const translations = {
     "lang.ewondo": "Ewondo",
   },
   ewondo: {
-    // Basic translations for Ewondo 
-    "app.title": "Esan ya ndinga a mɛvɛ",
-    "app.subtitle": "Esan a ndinga ya ba nyɔ̀m a mɛvɛ",
+    // Basic translations for Ewondo (simplified for demo)
+    "app.title": "MedAdmin - Tableau Be Dokta",
+    "app.subtitle": "Système be ba dokta be ba belua",
     "nav.home": "Eka",
     "nav.feedback": "Feedback",
     "nav.reminders": "Be Reminder",
