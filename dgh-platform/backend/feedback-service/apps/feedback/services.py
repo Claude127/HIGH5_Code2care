@@ -10,11 +10,16 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def categorize_feedback_theme(sentiment: str, rating: int) -> str:
+def categorize_feedback_theme(feedback_text: str, sentiment: str, rating: int = None) -> str:
     """
-    Détermine le thème basé sur le sentiment et le rating
+    Détermine le thème basé sur le texte du feedback, sentiment et rating
+    
+    Args:
+        feedback_text: Texte du feedback pour analyse intelligente
+        sentiment: Sentiment détecté
+        rating: Note optionnelle du patient
     """
-    return get_feedback_theme(sentiment, rating)
+    return get_feedback_theme(feedback_text=feedback_text, sentiment=sentiment, rating=rating)
 
 
 
@@ -61,8 +66,8 @@ def process_feedback(feedback: Feedback) -> Feedback:
         feedback.sentiment_negative_score = scores.get('negative', 0)
         feedback.sentiment_neutral_score = scores.get('neutral', 0)
         
-        # Catégorisation thématique
-        theme_name = categorize_feedback_theme(sentiment, feedback.rating)
+        # Catégorisation thématique intelligente avec le texte
+        theme_name = categorize_feedback_theme(feedback.description, sentiment, feedback.rating)
         theme = get_or_create_theme(theme_name)
         
         # Finalisation
