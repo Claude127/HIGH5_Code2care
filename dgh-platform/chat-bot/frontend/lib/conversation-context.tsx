@@ -31,7 +31,7 @@ interface ConversationContextType {
   conversations: Conversation[]
   currentConversation: Conversation | null
   isLoading: boolean
-  createNewConversation: () => void
+  createNewConversation: () => Conversation
   selectConversation: (id: string) => void
   deleteConversation: (id: string) => void
   renameConversation: (id: string, newTitle: string) => void

@@ -236,11 +236,23 @@ export function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
 
   const getSyncStatusIcon = (message: any) => {
     if (message.synced) {
-      return <CheckCircle className="h-3 w-3 text-green-500" title="Synchronisé" />
+      return (
+        <div title="Synchronisé">
+          <CheckCircle className="h-3 w-3 text-green-500" />
+        </div>
+      )
     } else if (isLoading || isSyncing) {
-      return <Clock className="h-3 w-3 text-yellow-500 animate-pulse" title="Synchronisation en cours" />
+      return (
+        <div title="Synchronisation en cours">
+          <Clock className="h-3 w-3 text-yellow-500 animate-pulse" />
+        </div>
+      )
     } else {
-      return <AlertCircle className="h-3 w-3 text-yellow-500" title="En attente de synchronisation" />
+      return (
+        <div title="En attente de synchronisation">
+          <AlertCircle className="h-3 w-3 text-yellow-500" />
+        </div>
+      )
     }
   }
 
@@ -270,17 +282,25 @@ export function ChatInterface({ sidebarOpen }: ChatInterfaceProps) {
             {/* Indicateurs de statut */}
             <div className="flex items-center gap-2">
               {isSyncing && (
-                <RefreshCw className="h-4 w-4 text-teal-500 animate-spin" title="Synchronisation en cours" />
+                <div title="Synchronisation en cours">
+                  <RefreshCw className="h-4 w-4 text-teal-500 animate-spin" />
+                </div>
               )}
 
               {currentConversation?.synced ? (
-                <CheckCircle className="h-4 w-4 text-green-500" title="Conversation synchronisée" />
+                <div title="Conversation synchronisée">
+                  <CheckCircle className="h-4 w-4 text-green-500" />
+                </div>
               ) : (
-                <AlertCircle className="h-4 w-4 text-yellow-500" title="Synchronisation en attente" />
+                <div title="Synchronisation en attente">
+                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                </div>
               )}
 
               {lastSyncError && (
-                <AlertCircle className="h-4 w-4 text-red-500" title={`Erreur: ${lastSyncError}`} />
+                <div title={`Erreur: ${lastSyncError}`}>
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                </div>
               )}
             </div>
           </div>
