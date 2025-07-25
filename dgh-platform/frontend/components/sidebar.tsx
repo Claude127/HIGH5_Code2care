@@ -43,13 +43,22 @@ interface SidebarProps {
   currentUser: UserData
 }
 
+// const MENU_ITEMS: MenuItem[] = [
+//   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+//   { id: "patients", label: "Patients", icon: Users },
+//   { id: "appointments", label: "Appointments", icon: Calendar },
+//   { id: "prescriptions", label: "Prescriptions", icon: FileText },
+//   { id: "feedback", label: "Patient Feedback", icon: MessageSquare },
+// ]
 const MENU_ITEMS: MenuItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "patients", label: "Patients", icon: Users },
-  { id: "appointments", label: "Appointments", icon: Calendar },
+  { id: "professional/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { id: "professional/patient", label: "Patients", icon: Users },
+  { id: "professional/appointment", label: "Appointments", icon: Calendar },
   { id: "prescriptions", label: "Prescriptions", icon: FileText },
-  { id: "feedback", label: "Patient Feedback", icon: MessageSquare },
+
+  { id: "professional/feedback", label: "PatientFeedback", icon: MessageSquare },
 ]
+
 
 export function Sidebar({ activeTab, onTabChange, onLogout, currentUser }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false)
@@ -60,10 +69,22 @@ export function Sidebar({ activeTab, onTabChange, onLogout, currentUser }: Sideb
   const toggleCollapse = () => setCollapsed(!collapsed)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
 
+  // const handleTabChange = (tab: string) => {
+  //   onTabChange(tab)
+  //   closeMobileMenu()
+  // }
+
+  // const handleTabChange = (tab: string) => {
+  //   closeMobileMenu()
+  //   router.push(`/${tab}`)
+  // }
   const handleTabChange = (tab: string) => {
-    onTabChange(tab)
     closeMobileMenu()
+    router.push(`/professional/${tab}`)
   }
+
+
+
   const router = useRouter()
 
   const handleLogout = () => {
