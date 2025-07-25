@@ -134,6 +134,9 @@ TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', '')
 TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', '')
 TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', '')
 
+# Configuration Groq API pour analyse de sentiment
+GROQ_API_KEY = config('GROQ_API_KEY', default=None)
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
