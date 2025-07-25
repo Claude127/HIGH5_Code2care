@@ -11,6 +11,7 @@ export interface Patient {
   address?: string
 }
 
+// types/medical.ts
 export interface Professional {
   professional_id: string
   first_name: string
@@ -21,8 +22,10 @@ export interface Professional {
   department_id: string
   email: string
   phone: string
+  username?: string // Ajout optionnel
+  access_token?: string // Pour le JWT
+  refresh_token?: string // Pour le refresh token
 }
-
 export interface Appointment {
   appointment_id: string
   patient_id: string
