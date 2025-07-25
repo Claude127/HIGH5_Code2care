@@ -12,12 +12,15 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=lambda v: [s.strip() f
 # CORS pour production
 CORS_ALLOWED_ORIGINS = config('CORS_ORIGINS', default='https://api-gateway.onrender.com', cast=lambda v: [s.strip() for s in v.split(',')])
 
+# CSRF trusted origins pour Railway
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://high5code2care-production.up.railway.app', cast=lambda v: [s.strip() for s in v.split(',')])
+
 # Database - PostgreSQL sur Render
 DATABASES = {
     'default': config('DATABASE_URL', cast=db_url)
 }
 
-# Redis pour Celery sur Render
+# Redis pour Celery - Railway serverless
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 
 CACHES = {
