@@ -1,16 +1,21 @@
 """
 Proxy views pour le feedback-service via API Gateway
-Authentification et routage sécurisé pour les patients
+Authentification et routage sécurisé pour les patients et professionnels
+Inclut: Feedbacks, Appointments, et autres endpoints du feedback-service
 """
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.conf import settings
-from ..users.models import Patient
+from ..users.models import Patient, Professional
 from .swagger_schemas import (
     create_feedback_decorator, my_feedbacks_decorator, 
-    feedback_status_decorator, test_feedback_decorator
+    feedback_status_decorator, test_feedback_decorator,
+    list_appointments_decorator, create_appointment_decorator,
+    get_appointment_decorator, update_appointment_decorator,
+    delete_appointment_decorator, upcoming_appointments_decorator,
+    today_appointments_decorator
 )
 import httpx
 import json
@@ -251,5 +256,415 @@ def test_feedback(request):
         logger.error(f"Erreur lors de la création du feedback de test: {str(e)}")
         return Response(
             {'error': 'Erreur lors de la création du feedback de test'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+# ========== APPOINTMENT PROXY ENDPOINTS ==========
+
+@list_appointments_decorator
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_appointments(request):
+    """
+    Liste tous les rendez-vous selon le type d'utilisateur
+    Route: GET /api/v1/appointments/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        # Déterminer le type d'utilisateur
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'  
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/appointments/",
+                headers=headers,
+                params=request.query_params.dict()
+            )
+        
+        return Response(response.json(), status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des appointments: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la récupération des rendez-vous'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@create_appointment_decorator
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_appointment(request):
+    """
+    Création de rendez-vous
+    Route: POST /api/v1/appointments/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    appointment_data = request.data.copy()
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.post(
+                f"{service_url}/api/v1/appointments/",
+                headers=headers,
+                json=appointment_data
+            )
+        
+        return Response(response.json(), status=response.status_code)
+                
+    except Exception as e:
+        logger.error(f"Erreur lors de la création du rendez-vous: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la création du rendez-vous'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@get_appointment_decorator
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_appointment(request, appointment_id):
+    """
+    Récupération d'un rendez-vous spécifique
+    Route: GET /api/v1/appointments/{appointment_id}/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/appointments/{appointment_id}/",
+                headers=headers
+            )
+        
+        return Response(response.json(), status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération du rendez-vous: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la récupération du rendez-vous'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@update_appointment_decorator
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def update_appointment(request, appointment_id):
+    """
+    Mise à jour d'un rendez-vous
+    Route: PUT/PATCH /api/v1/appointments/{appointment_id}/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'Content-Type': 'application/json',
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        method = request.method.lower()
+        
+        with httpx.Client(timeout=30.0) as client:
+            if method == 'put':
+                response = client.put(
+                    f"{service_url}/api/v1/appointments/{appointment_id}/",
+                    headers=headers,
+                    json=request.data
+                )
+            else:  # PATCH
+                response = client.patch(
+                    f"{service_url}/api/v1/appointments/{appointment_id}/",
+                    headers=headers,
+                    json=request.data
+                )
+        
+        return Response(response.json(), status=response.status_code)
+                
+    except Exception as e:
+        logger.error(f"Erreur lors de la mise à jour du rendez-vous: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la mise à jour du rendez-vous'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@delete_appointment_decorator
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def delete_appointment(request, appointment_id):
+    """
+    Suppression d'un rendez-vous
+    Route: DELETE /api/v1/appointments/{appointment_id}/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.delete(
+                f"{service_url}/api/v1/appointments/{appointment_id}/",
+                headers=headers
+            )
+        
+        return Response(status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de la suppression du rendez-vous: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la suppression du rendez-vous'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@upcoming_appointments_decorator
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def upcoming_appointments(request):
+    """
+    Rendez-vous à venir
+    Route: GET /api/v1/appointments/upcoming/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/appointments/upcoming/",
+                headers=headers
+            )
+        
+        return Response(response.json(), status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des rendez-vous à venir: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la récupération des rendez-vous à venir'}, 
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+
+@today_appointments_decorator
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def today_appointments(request):
+    """
+    Rendez-vous du jour
+    Route: GET /api/v1/appointments/today/
+    """
+    user_type = None
+    user_id = None
+    
+    try:
+        if hasattr(request.user, 'patient'):
+            patient = Patient.objects.get(user=request.user)
+            user_type = 'patient'
+            user_id = str(patient.patient_id)
+        elif hasattr(request.user, 'professional'):
+            professional = Professional.objects.get(user=request.user)
+            user_type = 'professional'
+            user_id = str(professional.professional_id)
+        else:
+            return Response(
+                {'error': 'Type d\'utilisateur non supporté'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+    except (Patient.DoesNotExist, Professional.DoesNotExist):
+        return Response(
+            {'error': 'Profil utilisateur introuvable'}, 
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    headers = {
+        'X-User-ID': user_id,
+        'X-User-Type': user_type,
+        'Authorization': request.headers.get('Authorization', '')
+    }
+    
+    try:
+        service_url = settings.MICROSERVICES.get('FEEDBACK_SERVICE')
+        
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(
+                f"{service_url}/api/v1/appointments/today/",
+                headers=headers
+            )
+        
+        return Response(response.json(), status=response.status_code)
+            
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des rendez-vous du jour: {str(e)}")
+        return Response(
+            {'error': 'Erreur lors de la récupération des rendez-vous du jour'}, 
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )

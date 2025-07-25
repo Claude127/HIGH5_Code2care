@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.backends.postgresql.psycopg_any import DateTimeRange
 from django.utils import timezone
 import uuid
 
@@ -101,18 +102,20 @@ class Feedback(models.Model):
 
 
 class Appointment(models.Model):
+    """Rendez-vous patients - Version simplifiée"""
+    TYPE_CHOICES = [
+        ('consultation', 'Consultation'),
+        ('suivi', 'Suivi'),
+        ('examen', 'Examen'),
+    ]
+    
     appointment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    scheduled_date = models.DateField()
-    time = models.TimeField()
-    type = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, default='scheduled')
+    scheduled = models.DateTimeField(default=timezone.now, help_text="Date et heure du rendez-vous")
+    type = models.CharField(max_length=50, choices=TYPE_CHOICES, default='consultation')
     
-    # Relations avec API Gateway
-    patient_id = models.UUIDField()  # Reference vers Patient
-    professional_id = models.UUIDField()  # Reference vers Professional
-    
-    # Relation locale
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    # Relations avec API Gateway (UUID references)  
+    patient_id = models.UUIDField(help_text="Reference vers Patient dans API Gateway")
+    professional_id = models.UUIDField(help_text="Reference vers Professional dans API Gateway")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -121,15 +124,16 @@ class Appointment(models.Model):
         db_table = 'appointments'
         verbose_name = 'Appointment'
         verbose_name_plural = 'Appointments'
-        ordering = ['scheduled_date', 'time']
+        ordering = ['scheduled']
         indexes = [
             models.Index(fields=['patient_id']),
             models.Index(fields=['professional_id']),
-            models.Index(fields=['scheduled_date']),
+            models.Index(fields=['scheduled']),
+            models.Index(fields=['type']),
         ]
     
     def __str__(self):
-        return f"Appointment {self.appointment_id} - {self.scheduled_date}"
+        return f"RDV {self.type} - {self.scheduled.strftime('%d/%m/%Y %H:%M')}"
 
 
 class Reminder(models.Model):

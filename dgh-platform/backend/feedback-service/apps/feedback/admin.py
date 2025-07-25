@@ -43,10 +43,22 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('appointment_id', 'patient_id', 'department', 'scheduled_date', 'time', 'status')
-    list_filter = ('status', 'scheduled_date', 'created_at')
-    search_fields = ('patient_id', 'department__name', 'type')
+    list_display = ('appointment_id', 'patient_id', 'professional_id', 'scheduled', 'type', 'created_at')
+    list_filter = ('type', 'scheduled', 'created_at')
+    search_fields = ('patient_id', 'professional_id', 'type')
     readonly_fields = ('appointment_id', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Informations principales', {
+            'fields': ('appointment_id', 'scheduled', 'type')
+        }),
+        ('Relations', {
+            'fields': ('patient_id', 'professional_id')
+        }),
+        ('Métadonnées', {
+            'fields': ('created_at', 'updated_at')
+        })
+    )
 
 
 @admin.register(Reminder)
