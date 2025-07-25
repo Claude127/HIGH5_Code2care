@@ -41,6 +41,8 @@ interface SidebarProps {
   onTabChange: (tab: string) => void
   onLogout: () => void
   currentUser: UserData
+  collapsed: boolean
+  onCollapsedChange: (collapsed: boolean) => void
 }
 
 // const MENU_ITEMS: MenuItem[] = [
@@ -51,22 +53,21 @@ interface SidebarProps {
 //   { id: "feedback", label: "Patient Feedback", icon: MessageSquare },
 // ]
 const MENU_ITEMS: MenuItem[] = [
-  { id: "professional/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "professional/patient", label: "Patients", icon: Users },
-  { id: "professional/appointment", label: "Appointments", icon: Calendar },
-  { id: "prescriptions", label: "Prescriptions", icon: FileText },
+  { id: "", label: "Dashboard", icon: LayoutDashboard },
+  { id: "patient", label: "Patients", icon: Users },
+  { id: "appointment", label: "Appointments", icon: Calendar },
+  { id: "prescription", label: "Prescriptions", icon: FileText },
 
-  { id: "professional/feedback", label: "PatientFeedback", icon: MessageSquare },
+  { id: "feedback", label: "PatientFeedback", icon: MessageSquare },
 ]
 
 
-export function Sidebar({ activeTab, onTabChange, onLogout, currentUser }: SidebarProps) {
-  const [collapsed, setCollapsed] = useState(false)
+export function Sidebar({ activeTab, onTabChange, onLogout, currentUser, collapsed, onCollapsedChange }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const toggleTheme = () => setTheme(theme === "dark" ? "light" : "dark")
-  const toggleCollapse = () => setCollapsed(!collapsed)
+  const toggleCollapse = () => onCollapsedChange(!collapsed)
   const closeMobileMenu = () => setIsMobileMenuOpen(false)
 
   // const handleTabChange = (tab: string) => {
@@ -80,7 +81,7 @@ export function Sidebar({ activeTab, onTabChange, onLogout, currentUser }: Sideb
   // }
   const handleTabChange = (tab: string) => {
     closeMobileMenu()
-    router.push(`/professional/${tab}`)
+    router.push(`/professional/dashboard/${tab}`)
   }
 
 
@@ -128,7 +129,7 @@ export function Sidebar({ activeTab, onTabChange, onLogout, currentUser }: Sideb
         <aside
             className={`
           ${collapsed ? "w-20" : "w-80"} 
-          fixed lg:relative h-[100svh] bg-card border-r border-border transition-all duration-300 z-40
+          fixed h-[100vh] bg-card border-r border-border transition-all duration-300 z-40 top-0 left-0
           ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
           flex flex-col
         `}

@@ -8,9 +8,9 @@ import { PatientAuthProvider } from "@/components/patient-auth-context"
 import { LanguageProvider } from '@/contexts/language-context'
 
 
-const inter = Inter({ subsets: ["latin"] })
+export const inter = Inter({ subsets: ["latin"] })
 
-export const metadata: Metadata = {
+const metadata: Metadata = {
     title: "HIGH5 medical platform",
     description: "Modern medical platform for professionals and patients",
     generator: ''

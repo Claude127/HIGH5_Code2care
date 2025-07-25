@@ -104,14 +104,14 @@
 "use client"
 import { useAuth } from "@/contexts/auth-context"
 import { usePatientAuth } from "@/components/patient-auth-context"
-import { Dashboard } from "@/components/dashboard"
-import { PatientHomePage } from "@/components/patient-home-page"
 import { WelcomePage } from "@/components/welcome-page"
 import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function HomePage() {
   const { isAuthenticated: isAdminAuth, isLoading: isAdminLoading } = useAuth()
   const { isAuthenticated: isPatientAuth, isLoading: isPatientLoading } = usePatientAuth()
+  const router = useRouter();
 
   if (isAdminLoading || isPatientLoading) {
     return (
@@ -123,15 +123,13 @@ export default function HomePage() {
 
   // If admin is authenticated, show admin dashboard
   if (isAdminAuth) {
-    return <Dashboard />
+      router.replace("/professional/dashboard")
   }
 
   // If patient is authenticated, show patient interface
   if (isPatientAuth) {
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-green-50 to-blue-100 dark:from-gray-950 dark:via-blue-950 dark:to-green-950">
-          <PatientHomePage />
-        </div>
+        router.replace("/patient/login")
     )
   }
 
