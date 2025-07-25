@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install torch==2.7.1+cpu --extra-index-url https://download.pytorch.org/whl/cpu && \
+    # pip install torch==2.7.1+cpu --extra-index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt && \
     pip cache purge && \
     find /usr/local/lib/python3.11 -name "*.pyc" -delete && \

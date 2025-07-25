@@ -28,10 +28,13 @@ uritemplate==4.2.0
 psycopg2-binary==2.9.9
 gunicorn==21.2.0
 whitenoise==6.6.0
+# ML Dependencies - Commented out for Groq API migration
 # torch==2.7.1  # Installed separately as CPU-only in Dockerfile
-transformers==4.53.1
-celery==5.5.3
+# transformers==4.53.1  # Heavy ML library - using Groq API instead
 # tiktoken==0.8.0  # Only needed for OpenAI models - removed to save space
 # protobuf==5.29.2  # Will be included as transformers dependency if needed
+# sentencepiece==0.2.0  # Tokenizer dependency - not needed with API
+
+celery==5.5.3
 django-filter==24.3
-sentencepiece==0.2.0
+groq==0.30.0  # API client for Groq sentiment analysis
