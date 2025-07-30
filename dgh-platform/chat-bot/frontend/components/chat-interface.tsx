@@ -31,7 +31,6 @@ const ReactMarkdown = dynamic(() => import('react-markdown'), {
   loading: () => <div className="animate-pulse bg-gray-200 dark:bg-gray-700 h-4 w-full rounded" />,
   ssr: false
 })
-
 interface ChatInterfaceProps {
   sidebarOpen: boolean
 }
@@ -177,7 +176,7 @@ export function ChatInterface({ sidebarOpen }: ChatInterfaceProps): React.JSX.El
 
       // SYNCHRONISATION CRITIQUE : Remplacer tout l'historique frontend
       // par celui renvoyé par le backend (source de vérité unique)
-      if (data.messages && Array.isArray(data.messages) && data.conversationId) {
+      if (data?.messages && Array.isArray(data.messages) && data.conversationId) {
         setIsSyncing(true)
 
         try {
@@ -189,7 +188,7 @@ export function ChatInterface({ sidebarOpen }: ChatInterfaceProps): React.JSX.El
           setLastSyncError("Erreur de synchronisation des messages")
 
           // Fallback : ajouter seulement la réponse
-          if (data.answer) {
+          if (data?.answer) {
             addMessageToCurrentConversation(data.answer, "assistant")
           }
         } finally {
@@ -198,7 +197,7 @@ export function ChatInterface({ sidebarOpen }: ChatInterfaceProps): React.JSX.El
       } else {
         // Fallback si pas de messages complets retournés
         console.warn("Pas d'historique complet reçu, utilisation du fallback")
-        const answer = data.answer || "Erreur : pas de réponse reçue"
+        const answer = data?.answer || "Erreur : pas de réponse reçue"
         addMessageToCurrentConversation(answer, "assistant")
       }
 

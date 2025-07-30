@@ -25,7 +25,6 @@ const FilesContext = createContext<FilesContextType | undefined>(undefined)
 
 export function FilesProvider({ children }: { children: React.ReactNode }) {
   const [files, setFiles] = useState<FileData[]>([])
-
   const addFile = useCallback(async (file: File, conversationId: string): Promise<FileData> => {
     return new Promise((resolve) => {
       const reader = new FileReader()
