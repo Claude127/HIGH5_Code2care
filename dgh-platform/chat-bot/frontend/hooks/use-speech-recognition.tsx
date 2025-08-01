@@ -28,15 +28,17 @@ export function useSpeechRecognition(): SpeechRecognitionHook {
         recognitionRef.current.lang = "fr-FR"
 
         recognitionRef.current.onresult = (event: any) => {
+          let interimTranscript = ""
           let finalTranscript = ""
           for (let i = event.resultIndex; i < event.results.length; i++) {
             if (event.results[i].isFinal) {
               finalTranscript += event.results[i][0].transcript
+            } else {
+              interimTranscript += event.results[i][0].transcript
             }
           }
-          if (finalTranscript) {
-            setTranscript(finalTranscript)
-          }
+          // Always update transcript with both final and interim for real-time feedback
+          setTranscript(finalTranscript + interimTranscript)
         }
 
         recognitionRef.current.onend = () => {
