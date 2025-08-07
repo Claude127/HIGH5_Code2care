@@ -1,28 +1,28 @@
-# utils.py - Version compatible LangChain sans PyTorch
+# utils.py - LangChain compatible version without PyTorch
 
 import os
 import logging
 from groq import Groq
 from qdrant_client import QdrantClient
 
-# Import de notre classe d'embeddings légère
+# Import our lightweight embeddings class
 from app.services.embeddings_langchain import LightweightEmbeddings
 
 logger = logging.getLogger(__name__)
 
-# Configuration Qdrant
+# Qdrant Configuration
 QDRANT_CLOUD_URL = "https://2fb00d86-37a3-405d-8b4c-b08155fb91f5.europe-west3-0.gcp.cloud.qdrant.io:6333"
 QDRANT_CLOUD_API_KEY = os.getenv('QDRANT_API_KEY')
 
-# Configuration locale par défaut
+# Default local configuration
 QDRANT_LOCAL_HOST = "localhost"
 QDRANT_LOCAL_PORT = 6333
 QDRANT_LOCAL_GRPC_PORT = 6334
 
 
 def create_qdrant_client():
-    """Crée un client Qdrant en tentant d'abord le cloud, puis le local"""
-    # Tentative de connexion au cloud
+    """Create a Qdrant client by trying cloud first, then local"""
+    # Attempt cloud connection
     if QDRANT_CLOUD_API_KEY:
         try:
             cloud_client = QdrantClient(
@@ -31,17 +31,17 @@ def create_qdrant_client():
                 timeout=10
             )
 
-            # Test de la connexion
+            # Test the connection
             collections = cloud_client.get_collections()
-            logger.info(f"✅ Connexion Qdrant Cloud réussie - {len(collections.collections)} collections")
+            logger.info(f"✅ Qdrant Cloud connection successful - {len(collections.collections)} collections")
             return cloud_client, "cloud"
 
         except Exception as e:
-            logger.warning(f"⚠️ Échec connexion Qdrant Cloud: {e}")
+            logger.warning(f"⚠️ Qdrant Cloud connection failed: {e}")
     else:
-        logger.info("🔧 Clé API Qdrant Cloud non configurée, utilisation du local")
+        logger.info("🔧 Qdrant Cloud API key not configured, using local")
 
-    # Fallback vers l'instance locale
+    # Fallback to local instance
     try:
         local_client = QdrantClient(
             host=QDRANT_LOCAL_HOST,
@@ -51,47 +51,47 @@ def create_qdrant_client():
             timeout=60
         )
 
-        # Test de la connexion
+        # Test the connection
         collections = local_client.get_collections()
-        logger.info(f"✅ Connexion Qdrant Local réussie - {len(collections.collections)} collections")
+        logger.info(f"✅ Qdrant Local connection successful - {len(collections.collections)} collections")
         return local_client, "local"
 
     except Exception as e:
-        logger.error(f"❌ Échec connexion Qdrant Local: {e}")
+        logger.error(f"❌ Qdrant Local connection failed: {e}")
         raise ConnectionError(
-            "Impossible de se connecter à Qdrant (ni cloud ni local). "
-            "Vérifiez votre configuration et que Docker Qdrant est démarré."
+            "Unable to connect to Qdrant (neither cloud nor local). "
+            "Check your configuration and that Docker Qdrant is running."
         )
 
 
-# Initialisation du client Qdrant
+# Qdrant client initialization
 try:
     qdrant, qdrant_mode = create_qdrant_client()
-    logger.info(f"🔗 Mode Qdrant actif: {qdrant_mode}")
+    logger.info(f"🔗 Active Qdrant mode: {qdrant_mode}")
 except Exception as e:
-    logger.error(f"❌ Erreur d'initialisation Qdrant: {e}")
+    logger.error(f"❌ Qdrant initialization error: {e}")
     qdrant = None
     qdrant_mode = "none"
 
-# Modèle d'embedding léger (REMPLACE SentenceTransformer)
+# Lightweight embedding model (REPLACES SentenceTransformer)
 try:
     embed_model = LightweightEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    logger.info("✅ Modèle d'embedding léger chargé (compatible LangChain)")
+    logger.info("✅ Lightweight embedding model loaded (LangChain compatible)")
 except Exception as e:
-    logger.error(f"❌ Erreur chargement modèle embedding: {e}")
+    logger.error(f"❌ Error loading embedding model: {e}")
     embed_model = None
 
-# Client Groq 
+# Groq Client
 try:
     groq_client = Groq(api_key=os.getenv('GROQ_API_KEY'))
-    logger.info("✅ Client Groq configuré")
+    logger.info("✅ Groq client configured")
 except Exception as e:
-    logger.error(f"❌ Erreur configuration Groq client: {e}")
+    logger.error(f"❌ Error configuring Groq client: {e}")
     groq_client = None
 
 
 def get_qdrant_info():
-    """Retourne les informations sur la connexion Qdrant active"""
+    """Return information about the active Qdrant connection"""
     if qdrant is None:
         return {"status": "disconnected", "mode": "none"}
 
@@ -109,17 +109,17 @@ def get_qdrant_info():
 
 
 def test_lightweight_setup():
-    """Test de l'installation légère avec LangChain"""
-    print("🧪 TEST INSTALLATION LÉGÈRE + LANGCHAIN")
+    """Test lightweight installation with LangChain"""
+    print("🧪 LIGHTWEIGHT + LANGCHAIN INSTALLATION TEST")
     print("=" * 45)
 
     # Test Qdrant
     qdrant_info = get_qdrant_info()
     print(f"📊 Qdrant: {qdrant_info['status']} ({qdrant_info['mode']})")
 
-    # Test Embedding (interface LangChain)
+    # Test Embedding (LangChain interface)
     if embed_model:
-        test_texts = ["Test embedding médical", "Diagnostic clinique"]
+        test_texts = ["Medical embedding test", "Clinical diagnosis"]
 
         # Test embed_documents (LangChain interface)
         embeddings = embed_model.embed_documents(test_texts)
@@ -129,9 +129,9 @@ def test_lightweight_setup():
         query_emb = embed_model.embed_query("test query")
         print(f"🔍 embed_query: ✅ {len(query_emb)}D")
 
-        # Test similarité
-        similarity = embed_model.similarity(test_texts[0], "embedding médical test")
-        print(f"🎯 Similarité: {similarity:.3f}")
+        # Test similarity
+        similarity = embed_model.similarity(test_texts[0], "medical embedding test")
+        print(f"🎯 Similarity: {similarity:.3f}")
 
     # Test Groq
     if groq_client:
@@ -141,42 +141,42 @@ def test_lightweight_setup():
                 messages=[{"role": "user", "content": "Test"}],
                 max_tokens=10
             )
-            print("🤖 Groq: ✅ Connecté")
+            print("🤖 Groq: ✅ Connected")
         except Exception as e:
             print(f"🤖 Groq: ❌ {e}")
 
     print("=" * 45)
-    print("✅ MIGRATION RÉUSSIE: HuggingFace → Lightweight + LangChain")
+    print("✅ MIGRATION SUCCESSFUL: HuggingFace → Lightweight + LangChain")
     return qdrant_info
 
 
 # Migration helpers
 def compare_with_huggingface():
-    """Compare l'ancienne et nouvelle approche"""
-    print("🔄 COMPARAISON HUGGINGFACE vs LIGHTWEIGHT")
+    """Compare the old and new approach"""
+    print("🔄 COMPARISON HUGGINGFACE vs LIGHTWEIGHT")
     print("=" * 50)
 
-    print("❌ AVANT (HuggingFaceEmbeddings):")
+    print("❌ BEFORE (HuggingFaceEmbeddings):")
     print("   - sentence-transformers: ~500MB")
     print("   - torch: ~2GB")
     print("   - transformers: ~500MB")
-    print("   - TOTAL: ~3GB + risque SIGKILL")
+    print("   - TOTAL: ~3GB + SIGKILL risk")
 
-    print("\n✅ APRÈS (LightweightEmbeddings):")
+    print("\n✅ AFTER (LightweightEmbeddings):")
     print("   - scikit-learn: ~50MB")
     print("   - numpy: ~20MB")
     print("   - TOTAL: ~70MB")
-    print("   - Compatible LangChain 100%")
-    print("   - Interface identique")
+    print("   - 100% LangChain Compatible")
+    print("   - Identical interface")
 
-    print("\n🎯 FONCTIONNALITÉS CONSERVÉES:")
+    print("\n🎯 PRESERVED FEATURES:")
     print("   ✅ QdrantVectorStore")
     print("   ✅ create_retrieval_chain")
     print("   ✅ ChatGroq")
     print("   ✅ MessagesPlaceholder")
     print("   ✅ ask_question_with_history")
-    print("   ✅ Historique de conversation")
-    print("   ✅ Recherche vectorielle")
+    print("   ✅ Conversation history")
+    print("   ✅ Vector search")
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# app/services/rag_groq.py - Version avec lazy loading et gestion d'erreurs
+# app/services/rag_groq.py - Version with lazy loading and error handling
 
 import os
 from typing import Tuple, Optional, List
@@ -6,7 +6,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 import logging
 
-# LANGCHAIN IMPORTS (version légère)
+# LANGCHAIN IMPORTS (lightweight version)
 from langchain_qdrant import QdrantVectorStore, RetrievalMode
 from langchain_groq import ChatGroq
 from langchain.schema import HumanMessage, AIMessage, Document
@@ -14,16 +14,16 @@ from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 
-# Notre classe d'embeddings légère (compatible LangChain)
+# Our lightweight embeddings class (LangChain compatible)
 from .embeddings_langchain import LightweightEmbeddings
 
 logger = logging.getLogger(__name__)
 
-# Configuration Qdrant
+# Qdrant Configuration
 QDRANT_CLOUD_URL = "https://2fb00d86-37a3-405d-8b4c-b08155fb91f5.europe-west3-0.gcp.cloud.qdrant.io:6333"
 QDRANT_CLOUD_API_KEY = os.getenv('QDRANT_API_KEY')
 
-# Variables globales pour le cache (lazy loading)
+# Global variables for caching (lazy loading)
 _client = None
 _client_mode = None
 _embedder = None
@@ -39,53 +39,53 @@ def get_embedder():
 
 
 def get_qdrant_client() -> Tuple[Optional[QdrantClient], str]:
-    """Obtient le client Qdrant avec fallback cloud -> local et gestion d'erreurs robuste"""
+    """Get Qdrant client with cloud -> local fallback and robust error handling"""
     global _client, _client_mode
 
-    # Retourner le client en cache s'il existe
+    # Return cached client if it exists
     if _client is not None:
         return _client, _client_mode
 
-    # Tentative cloud d'abord (PRIORITAIRE)
+    # Try cloud first (PRIORITY)
     if QDRANT_CLOUD_API_KEY:
         try:
-            logger.info("🌐 Tentative de connexion Qdrant Cloud...")
+            logger.info("🌐 Attempting Qdrant Cloud connection...")
             cloud_client = QdrantClient(
                 url=QDRANT_CLOUD_URL,
                 api_key=QDRANT_CLOUD_API_KEY,
-                timeout=10  # Timeout réduit pour éviter les blocages
+                timeout=10  # Reduced timeout to avoid blocking
             )
-            # Test de connexion avec une vraie requête
+            # Test connection with a real request
             collections = cloud_client.get_collections()
-            logger.info(f"🌐 ✅ Qdrant Cloud connecté - {len(collections.collections)} collections")
+            logger.info(f"🌐 ✅ Qdrant Cloud connected - {len(collections.collections)} collections")
             _client = cloud_client
             _client_mode = "cloud"
             return _client, _client_mode
         except Exception as e:
-            logger.warning(f"⚠️ Qdrant Cloud indisponible: {e}")
+            logger.warning(f"⚠️ Qdrant Cloud unavailable: {e}")
     else:
-        logger.warning("🔑 QDRANT_API_KEY non configurée - impossible d'utiliser le cloud")
+        logger.warning("🔑 QDRANT_API_KEY not configured - cannot use cloud")
 
-    # Fallback vers local seulement si le cloud échoue
+    # Fallback to local only if cloud fails
     try:
-        logger.info("🏠 Tentative de connexion Qdrant Local...")
+        logger.info("🏠 Attempting Qdrant Local connection...")
         local_client = QdrantClient(
             host="localhost",
             port=6333,
             grpc_port=6334,
             prefer_grpc=True,
-            timeout=5  # Timeout encore plus court pour local
+            timeout=5  # Even shorter timeout for local
         )
         collections = local_client.get_collections()
-        logger.info(f"🏠 ✅ Qdrant Local connecté - {len(collections.collections)} collections")
+        logger.info(f"🏠 ✅ Qdrant Local connected - {len(collections.collections)} collections")
         _client = local_client
         _client_mode = "local"
         return _client, _client_mode
     except Exception as e:
-        logger.error(f"❌ Qdrant Local indisponible: {e}")
+        logger.error(f"❌ Qdrant Local unavailable: {e}")
 
-    # Si tout échoue, mode offline
-    logger.error("❌ Aucun Qdrant disponible (ni cloud ni local) - Mode offline")
+    # If everything fails, offline mode
+    logger.error("❌ No Qdrant available (neither cloud nor local) - Offline mode")
     _client = None
     _client_mode = "offline"
     return _client, _client_mode
@@ -96,7 +96,7 @@ def ensure_collection_exists():
     client, client_mode = get_qdrant_client()
 
     if not client or client_mode == "offline":
-        logger.warning("⚠️ Pas de client Qdrant disponible pour créer la collection")
+        logger.warning("⚠️ No Qdrant client available to create collection")
         return False
 
     collection_name = "clinical_summaries"
@@ -104,11 +104,11 @@ def ensure_collection_exists():
     try:
         # Try to get collection info
         collection_info = client.get_collection(collection_name)
-        logger.info(f"✅ Collection '{collection_name}' existe sur {client_mode}")
+        logger.info(f"✅ Collection '{collection_name}' exists on {client_mode}")
         return True
     except Exception as e:
         if "doesn't exist" in str(e) or "Not found" in str(e) or "404" in str(e):
-            logger.warning(f"⚠️ Collection '{collection_name}' inexistante, création...")
+            logger.warning(f"⚠️ Collection '{collection_name}' doesn't exist, creating...")
             try:
                 # Create the collection with appropriate vector size
                 client.create_collection(
@@ -118,13 +118,13 @@ def ensure_collection_exists():
                         distance=Distance.COSINE
                     )
                 )
-                logger.info(f"✅ Collection '{collection_name}' créée sur {client_mode}")
+                logger.info(f"✅ Collection '{collection_name}' created on {client_mode}")
                 return True
             except Exception as create_error:
-                logger.error(f"❌ Échec création collection: {create_error}")
+                logger.error(f"❌ Failed to create collection: {create_error}")
                 return False
         else:
-            logger.error(f"❌ Erreur vérification collection: {e}")
+            logger.error(f"❌ Error checking collection: {e}")
             return False
 
 
@@ -133,7 +133,7 @@ def get_qdrant_store():
     client, client_mode = get_qdrant_client()
 
     if not client or client_mode == "offline":
-        raise Exception("Client Qdrant non disponible - mode offline")
+        raise Exception("Qdrant client not available - offline mode")
 
     if ensure_collection_exists():
         embedder = get_embedder()
@@ -144,14 +144,14 @@ def get_qdrant_store():
             retrieval_mode=RetrievalMode.DENSE,
         )
     else:
-        raise Exception("Impossible d'initialiser la collection Qdrant")
+        raise Exception("Unable to initialize Qdrant collection")
 
 
 def get_retrieval_chain():
     """Get the retrieval chain with lazy initialization and caching"""
     global _retrieval_chain
 
-    # Retourner la chaîne en cache si elle existe
+    # Return cached chain if it exists
     if _retrieval_chain is not None:
         return _retrieval_chain
 
@@ -159,7 +159,7 @@ def get_retrieval_chain():
         client, client_mode = get_qdrant_client()
 
         if not client or client_mode == "offline":
-            raise Exception("Qdrant non disponible - impossible de créer la chaîne de récupération")
+            raise Exception("Qdrant not available - cannot create retrieval chain")
 
         qdrant_store = get_qdrant_store()
 
@@ -174,48 +174,48 @@ def get_retrieval_chain():
             streaming=False,
         )
 
-        # Template de prompt avec historique
+        # Prompt template with history
         prompt_template = ChatPromptTemplate.from_messages([
-            ("system", f"""Tu es un assistant médical expert. Utilise le contexte fourni et l'historique de conversation pour répondre de manière précise et contextuelle.
+            ("system", f"""You are an expert medical assistant. Use the provided context and conversation history to answer precisely and contextually.
 
-Contexte médical:
+Medical context:
 {{context}}
 
 Instructions:
-- Réponds en français ou anglais selon la question
-- Sois précis et professionnel
-- Utilise l'historique pour maintenir la cohérence
-- Si tu ne sais pas, dis-le clairement
-- Source des données: Qdrant {client_mode}"""),
+- Answer in English or French based on the question
+- Be precise and professional
+- Use history to maintain consistency
+- If you don't know, say it clearly
+- Data source: Qdrant {client_mode}"""),
             MessagesPlaceholder(variable_name="chat_history"),
             ("human", "{input}")
         ])
 
-        # Chaîne de documents avec les bonnes variables
+        # Document chain with correct variables
         document_chain = create_stuff_documents_chain(llm, prompt_template)
         _retrieval_chain = create_retrieval_chain(retriever, document_chain)
 
-        logger.info(f"✅ Chaîne de récupération initialisée (mode: {client_mode})")
+        logger.info(f"✅ Retrieval chain initialized (mode: {client_mode})")
         return _retrieval_chain
     except Exception as e:
-        logger.error(f"❌ Échec initialisation chaîne: {e}")
+        logger.error(f"❌ Failed to initialize chain: {e}")
         raise
 
 
 def ask_question_with_history(question: str, chat_history: list):
-    """Ask a question with chat history context - Version avec fallback robuste"""
+    """Ask a question with chat history context - Version with robust fallback"""
     try:
         client, client_mode = get_qdrant_client()
 
-        # Si Qdrant n'est pas disponible, retourner une réponse de fallback
+        # If Qdrant is not available, return a fallback response
         if not client or client_mode == "offline":
-            logger.warning("⚠️ Qdrant non disponible - utilisation du fallback LLM")
+            logger.warning("⚠️ Qdrant not available - using LLM fallback")
             return fallback_llm_response(question, chat_history)
 
         # Get the retrieval chain (lazy initialization)
         retrieval_chain = get_retrieval_chain()
 
-        # Convertir l'historique en messages LangChain
+        # Convert history to LangChain messages
         history_messages = []
         for role, content in chat_history:
             if role == "human":
@@ -223,28 +223,28 @@ def ask_question_with_history(question: str, chat_history: list):
             elif role == "ai":
                 history_messages.append(AIMessage(content=content))
 
-        logger.info(f"🤖 Question: {question[:50]}... (historique: {len(history_messages)} messages)")
+        logger.info(f"🤖 Question: {question[:50]}... (history: {len(history_messages)} messages)")
 
-        # Exécuter la chaîne
+        # Execute the chain
         result = retrieval_chain.invoke({
             "input": question,
             "chat_history": history_messages
         })
 
-        # Récupérer les documents sources si disponibles
+        # Retrieve source documents if available
         context_docs = result.get("context", [])
 
-        logger.info(f"✅ Réponse générée avec RAG (sources: {len(context_docs)})")
+        logger.info(f"✅ Response generated with RAG (sources: {len(context_docs)})")
         return result["answer"], context_docs
 
     except Exception as e:
-        logger.error(f"❌ Erreur dans ask_question_with_history: {e}")
-        # Fallback en cas d'erreur
+        logger.error(f"❌ Error in ask_question_with_history: {e}")
+        # Fallback in case of error
         return fallback_llm_response(question, chat_history, error=str(e))
 
 
 def fallback_llm_response(question: str, chat_history: list, error: str = None):
-    """Réponse de fallback utilisant seulement le LLM sans RAG"""
+    """Fallback response using only LLM without RAG"""
     try:
         llm = ChatGroq(
             model_name="llama-3.1-8b-instant",
@@ -252,45 +252,45 @@ def fallback_llm_response(question: str, chat_history: list, error: str = None):
             streaming=False,
         )
 
-        # Construire le contexte depuis l'historique
+        # Build context from history
         context = ""
         if chat_history:
-            context = "\n".join([f"{role}: {content}" for role, content in chat_history[-5:]])  # Derniers 5 messages
+            context = "\n".join([f"{role}: {content}" for role, content in chat_history[-5:]])  # Last 5 messages
 
-        # Prompt simplifié sans RAG
-        system_msg = """Tu es un assistant médical. Réponds de manière professionnelle et précise.
+        # Simplified prompt without RAG
+        system_msg = """You are a medical assistant. Answer professionally and precisely.
 
-IMPORTANT: Indique clairement que tu n'as pas accès à la base de connaissances spécialisée actuellement."""
+IMPORTANT: Clearly indicate that you don't currently have access to the specialized knowledge base."""
 
         if error:
-            system_msg += f"\n\nNote technique: {error}"
+            system_msg += f"\n\nTechnical note: {error}"
 
         messages = [
             {"role": "system", "content": system_msg},
         ]
 
         if context:
-            messages.append({"role": "system", "content": f"Contexte de conversation récent:\n{context}"})
+            messages.append({"role": "system", "content": f"Recent conversation context:\n{context}"})
 
         messages.append({"role": "user", "content": question})
 
         response = llm.invoke(messages)
 
-        fallback_note = "\n\n⚠️ Réponse générée sans accès à la base de connaissances spécialisée."
+        fallback_note = "\n\n⚠️ Response generated without access to specialized knowledge base."
 
-        logger.info("✅ Réponse de fallback générée")
+        logger.info("✅ Fallback response generated")
         return response.content + fallback_note, []
 
     except Exception as fallback_error:
-        logger.error(f"❌ Erreur même dans le fallback: {fallback_error}")
-        error_msg = f"Désolé, une erreur technique est survenue. Veuillez réessayer plus tard."
+        logger.error(f"❌ Error even in fallback: {fallback_error}")
+        error_msg = f"Sorry, a technical error occurred. Please try again later."
         if error:
-            error_msg += f"\n\nDétails: {error}"
+            error_msg += f"\n\nDetails: {error}"
         return error_msg, []
 
 
 def get_qdrant_status():
-    """Retourne le statut de la connexion Qdrant avec lazy loading"""
+    """Return Qdrant connection status with lazy loading"""
     try:
         client, client_mode = get_qdrant_client()
 
@@ -298,7 +298,7 @@ def get_qdrant_status():
             return {
                 "status": "offline",
                 "mode": "offline",
-                "error": "Aucun client Qdrant disponible",
+                "error": "No Qdrant client available",
                 "embedding_model": "lightweight-tfidf-384d"
             }
 
@@ -329,63 +329,64 @@ def add_sample_documents():
         client, client_mode = get_qdrant_client()
 
         if not client or client_mode == "offline":
-            raise Exception("Qdrant non disponible pour ajouter des documents")
+            raise Exception("Qdrant not available to add documents")
 
         qdrant_store = get_qdrant_store()
 
         sample_docs = [
-            "Le diabète de type 2 est une maladie chronique caractérisée par une résistance à l'insuline.",
-            "L'hypertension artérielle est un facteur de risque majeur pour les maladies cardiovasculaires.",
-            "Les symptômes de l'angine de poitrine incluent une douleur thoracique et un essoufflement.",
-            "La pneumonie est une infection pulmonaire qui peut être causée par des bactéries ou des virus.",
-            "L'insuffisance cardiaque congestive affecte la capacité du cœur à pomper le sang efficacement."
+            "Type 2 diabetes is a chronic disease characterized by insulin resistance.",
+            "High blood pressure is a major risk factor for cardiovascular disease.",
+            "Symptoms of angina include chest pain and shortness of breath.",
+            "Pneumonia is a lung infection that can be caused by bacteria or viruses.",
+            "Congestive heart failure affects the heart's ability to pump blood efficiently."
+
         ]
 
-        # Convertir en Documents LangChain
+        # Convert to LangChain Documents
         documents = [Document(page_content=doc, metadata={"source": "sample", "id": i})
                      for i, doc in enumerate(sample_docs)]
 
-        # Ajouter via LangChain
+        # Add via LangChain
         qdrant_store.add_documents(documents)
-        logger.info(f"✅ {len(sample_docs)} documents d'exemple ajoutés sur {client_mode}")
+        logger.info(f"✅ {len(sample_docs)} sample documents added on {client_mode}")
 
     except Exception as e:
-        logger.error(f"❌ Échec ajout documents d'exemple: {e}")
+        logger.error(f"❌ Failed to add sample documents: {e}")
         raise
 
 
 def diagnose_qdrant():
-    """Fonction de diagnostic pour déboguer les problèmes"""
-    print("🔍 DIAGNOSTIC QDRANT (VERSION CORRIGÉE)")
+    """Diagnostic function to debug issues"""
+    print("🔍 QDRANT DIAGNOSTIC (CORRECTED VERSION)")
     print("=" * 50)
 
-    print(f"🔑 QDRANT_API_KEY configurée: {'✅ Oui' if QDRANT_CLOUD_API_KEY else '❌ Non'}")
-    print(f"🌐 URL Cloud: {QDRANT_CLOUD_URL}")
+    print(f"🔑 QDRANT_API_KEY configured: {'✅ Yes' if QDRANT_CLOUD_API_KEY else '❌ No'}")
+    print(f"🌐 Cloud URL: {QDRANT_CLOUD_URL}")
 
-    # Test de connexion
+    # Connection test
     client, client_mode = get_qdrant_client()
-    print(f"🔗 Mode actuel: {client_mode}")
+    print(f"🔗 Current mode: {client_mode}")
     print(f"🧠 Embeddings: LightweightEmbeddings (TF-IDF + fallbacks, 384D)")
 
     status = get_qdrant_status()
-    print(f"📊 Statut: {status}")
+    print(f"📊 Status: {status}")
 
     if status["status"] == "connected":
         print(f"📚 Collections: {status.get('collections', [])}")
-        print(f"🩺 Collection clinical_summaries: {'✅' if status.get('has_clinical_summaries') else '❌'}")
+        print(f"🩺 clinical_summaries collection: {'✅' if status.get('has_clinical_summaries') else '❌'}")
 
-    # Test des embeddings
+    # Test embeddings
     try:
         embedder = get_embedder()
-        test_embedding = embedder.embed_query("test médical")
-        print(f"🔢 Test embedding: ✅ {len(test_embedding)} dimensions")
+        test_embedding = embedder.embed_query("medical test")
+        print(f"🔢 Embedding test: ✅ {len(test_embedding)} dimensions")
     except Exception as e:
-        print(f"🔢 Test embedding: ❌ {e}")
+        print(f"🔢 Embedding test: ❌ {e}")
 
     return status
 
 
-# Export des fonctions principales (interface identique)
+# Export main functions (identical interface)
 __all__ = [
     "ask_question_with_history",
     "get_qdrant_status",

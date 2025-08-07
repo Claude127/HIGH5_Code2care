@@ -213,9 +213,9 @@ if __name__ == "__main__":
 
     # Test basique
     test_texts = [
-        "Le patient présente des symptômes de diabète",
-        "Diagnostic médical et traitement approprié",
-        "Consultation cardiologique recommandée"
+        "The patient has symptoms of diabetes",
+        "Medical diagnosis and appropriate treatment",
+        "Cardiology consultation recommended"
     ]
 
     print("🧪 Test embeddings légers...")
